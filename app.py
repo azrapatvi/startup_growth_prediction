@@ -22,7 +22,7 @@ st.set_page_config(page_title="Startup Growth Advisor", page_icon="🚀", layout
 
 llm = ChatGroq(model='openai/gpt-oss-120b')
 
-fourth_new_et_model_n_100_pipe = joblib.load(r'models\fourth_new_et_model_n_100_pipe.pkl')
+fourth_new_et_model_n_100_pipe = joblib.load('models/fourth_new_et_model_n_100_pipe.pkl')
 
 
 def feature_engineering(df):
