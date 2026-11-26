@@ -17,12 +17,175 @@ load_dotenv()
 st.set_page_config(page_title="Startup Growth Advisor", page_icon="🚀", layout="wide")
 
 # =====================================================================
+#  API KEY GATE (naya): key daale bina aage nahi badh sakte
+# =====================================================================
+
+APP_CSS = """
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+html, body, [class*="css"], .stApp { font-family: 'Inter', sans-serif; }
+
+/* page background */
+.stApp {
+    background:
+        radial-gradient(1000px 500px at 85% -10%, rgba(99,102,241,0.18), transparent 60%),
+        radial-gradient(800px 400px at -5% 10%, rgba(236,72,153,0.12), transparent 60%),
+        #0b1020;
+}
+#MainMenu, footer, header[data-testid="stHeader"] { visibility: hidden; height: 0; }
+.block-container { padding-top: 1.6rem; padding-bottom: 4rem; max-width: 1180px; }
+
+/* global text colours for dark look */
+.stApp, .stApp p, .stApp label, .stApp span, .stApp li,
+.stApp h1, .stApp h2, .stApp h3, .stApp h4 { color: #e5e7ef; }
+label, .stMarkdown small, [data-testid="stCaptionContainer"] { color: #9aa3b8 !important; }
+
+/* hero */
+.hero {
+    position: relative; overflow: hidden;
+    padding: 2.2rem 2.4rem; border-radius: 22px; margin-bottom: 1.4rem;
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 55%, #db2777 100%);
+    box-shadow: 0 20px 50px rgba(79,70,229,0.35);
+}
+.hero::after {
+    content: ""; position: absolute; right: -60px; top: -60px; width: 260px; height: 260px;
+    background: radial-gradient(circle, rgba(255,255,255,0.28), transparent 70%); border-radius: 50%;
+}
+.hero h1 { margin: 0; font-size: 2.3rem; font-weight: 800; color: #fff !important; letter-spacing: -0.5px; }
+.hero p { margin: 0.5rem 0 0; font-size: 1.02rem; color: rgba(255,255,255,0.88) !important; }
+.pill {
+    display: inline-block; margin: 0.9rem 0.4rem 0 0; padding: 0.28rem 0.8rem; border-radius: 999px;
+    background: rgba(255,255,255,0.18); color: #fff !important; font-size: 0.78rem; font-weight: 600;
+    backdrop-filter: blur(6px); border: 1px solid rgba(255,255,255,0.25);
+}
+
+/* section titles */
+.sec-title {
+    display: flex; align-items: center; gap: 0.6rem; margin: 0.4rem 0 0.9rem;
+    font-size: 1.12rem; font-weight: 700; color: #fff;
+}
+.sec-title .num {
+    width: 28px; height: 28px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #6366f1, #a855f7); font-size: 0.85rem; color: #fff;
+}
+
+/* form card */
+[data-testid="stForm"] {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.09);
+    border-radius: 20px; padding: 1.6rem 1.8rem;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.25);
+}
+
+/* inputs */
+.stTextInput input, .stTextArea textarea, .stNumberInput input, .stDateInput input,
+div[data-baseweb="select"] > div {
+    background: rgba(255,255,255,0.06) !important;
+    border: 1px solid rgba(255,255,255,0.12) !important;
+    border-radius: 12px !important; color: #f1f3fa !important;
+}
+.stTextInput input:focus, .stTextArea textarea:focus, .stNumberInput input:focus {
+    border-color: #8b5cf6 !important; box-shadow: 0 0 0 3px rgba(139,92,246,0.25) !important;
+}
+div[data-baseweb="select"] span { color: #f1f3fa !important; }
+
+/* tabs */
+.stTabs [data-baseweb="tab-list"] { gap: 6px; background: rgba(255,255,255,0.04); padding: 6px; border-radius: 14px; }
+.stTabs [data-baseweb="tab"] {
+    border-radius: 10px; padding: 0.5rem 1.1rem; background: transparent; color: #9aa3b8; font-weight: 600;
+}
+.stTabs [aria-selected="true"] { background: linear-gradient(135deg, #6366f1, #8b5cf6) !important; color: #fff !important; }
+.stTabs [data-baseweb="tab-highlight"], .stTabs [data-baseweb="tab-border"] { display: none; }
+
+/* buttons */
+.stButton > button, [data-testid="stFormSubmitButton"] > button {
+    border-radius: 14px; font-weight: 700; padding: 0.7rem 1.2rem; border: 0;
+    background: linear-gradient(135deg, #6366f1, #a855f7, #ec4899); color: #fff;
+    box-shadow: 0 10px 28px rgba(139,92,246,0.4); transition: transform .15s ease, box-shadow .15s ease;
+}
+.stButton > button:hover, [data-testid="stFormSubmitButton"] > button:hover {
+    transform: translateY(-2px); box-shadow: 0 14px 34px rgba(139,92,246,0.55); color: #fff;
+}
+
+/* expander */
+[data-testid="stExpander"] {
+    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.09); border-radius: 14px;
+}
+
+/* metric cards */
+.kpi-wrap { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 0.6rem 0 0.4rem; }
+.kpi {
+    position: relative; overflow: hidden; border-radius: 18px; padding: 1.3rem 1.4rem;
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+}
+.kpi::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: var(--accent); }
+.kpi .lbl { font-size: 0.78rem; letter-spacing: .08em; text-transform: uppercase; color: #9aa3b8; font-weight: 600; }
+.kpi .val { font-size: 1.85rem; font-weight: 800; color: #fff; margin-top: 0.3rem; letter-spacing: -0.5px; }
+.kpi .sub { font-size: 0.82rem; margin-top: 0.2rem; color: #9aa3b8; }
+.kpi.up   { --accent: #22c55e; } .kpi.up .val { color: #4ade80; }
+.kpi.down { --accent: #ef4444; } .kpi.down .val { color: #f87171; }
+.kpi.cur  { --accent: #38bdf8; }
+.kpi.prd  { --accent: #a855f7; }
+@media (max-width: 800px) { .kpi-wrap { grid-template-columns: 1fr; } }
+
+/* chat */
+[data-testid="stChatMessage"] {
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px; padding: 1rem 1.2rem; margin-bottom: 0.7rem;
+}
+[data-testid="stChatInput"] { border-radius: 16px; }
+[data-testid="stChatInput"] textarea { color: #f1f3fa !important; }
+
+hr { border-color: rgba(255,255,255,0.08) !important; }
+</style>
+"""
+st.markdown(APP_CSS, unsafe_allow_html=True)
+
+if "groq_api_key" not in st.session_state:
+    st.session_state.groq_api_key = ""
+
+if not st.session_state.groq_api_key:
+    st.markdown(
+        """
+<div class="hero">
+    <h1>🚀 Startup Growth Advisor</h1>
+    <p>Enter your Groq API key to unlock the app.</p>
+    <span class="pill">🔒 Key is kept only in this browser session</span>
+</div>
+""",
+        unsafe_allow_html=True,
+    )
+    _c1, _c2, _c3 = st.columns([1, 2, 1])
+    with _c2:
+        with st.form("api_key_form"):
+            st.markdown("#### 🔑 Groq API key")
+            entered_key = st.text_input("API key", type="password", placeholder="gsk_...",
+                                        label_visibility="collapsed")
+            unlock = st.form_submit_button("Unlock app", type="primary", use_container_width=True)
+        if unlock:
+            if not entered_key.strip():
+                st.error("Please enter your Groq API key to continue.")
+            else:
+                with st.spinner("Checking your key..."):
+                    try:
+                        ChatGroq(model='openai/gpt-oss-120b', api_key=entered_key.strip()).invoke("hi")
+                    except Exception:
+                        st.error("This key did not work. Please check it and try again.")
+                    else:
+                        st.session_state.groq_api_key = entered_key.strip()
+                        st.rerun()
+    st.stop()   # key nahi hai to yahin ruk jao, neeche ka kuch nahi chalega
+
+# =====================================================================
 #  YOUR LOGIC (unchanged)
 # =====================================================================
 
-llm = ChatGroq(model='openai/gpt-oss-120b')
+GROQ_API_KEY = st.session_state.groq_api_key
+llm = ChatGroq(model='openai/gpt-oss-120b',api_key=GROQ_API_KEY)
 
-fourth_new_et_model_n_100_pipe = joblib.load('models/fourth_new_et_model_n_100_pipe.pkl')
+fourth_new_et_model_n_100_pipe = joblib.load(r'models\fourth_new_et_model_n_100_pipe.pkl')
 
 
 def feature_engineering(df):
@@ -292,130 +455,6 @@ def ask(question):
 
 
 # ---------------------------- STYLING ----------------------------
-st.markdown(
-    """
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-
-html, body, [class*="css"], .stApp { font-family: 'Inter', sans-serif; }
-
-/* page background */
-.stApp {
-    background:
-        radial-gradient(1000px 500px at 85% -10%, rgba(99,102,241,0.18), transparent 60%),
-        radial-gradient(800px 400px at -5% 10%, rgba(236,72,153,0.12), transparent 60%),
-        #0b1020;
-}
-#MainMenu, footer, header[data-testid="stHeader"] { visibility: hidden; height: 0; }
-.block-container { padding-top: 1.6rem; padding-bottom: 4rem; max-width: 1180px; }
-
-/* global text colours for dark look */
-.stApp, .stApp p, .stApp label, .stApp span, .stApp li,
-.stApp h1, .stApp h2, .stApp h3, .stApp h4 { color: #e5e7ef; }
-label, .stMarkdown small, [data-testid="stCaptionContainer"] { color: #9aa3b8 !important; }
-
-/* hero */
-.hero {
-    position: relative; overflow: hidden;
-    padding: 2.2rem 2.4rem; border-radius: 22px; margin-bottom: 1.4rem;
-    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 55%, #db2777 100%);
-    box-shadow: 0 20px 50px rgba(79,70,229,0.35);
-}
-.hero::after {
-    content: ""; position: absolute; right: -60px; top: -60px; width: 260px; height: 260px;
-    background: radial-gradient(circle, rgba(255,255,255,0.28), transparent 70%); border-radius: 50%;
-}
-.hero h1 { margin: 0; font-size: 2.3rem; font-weight: 800; color: #fff !important; letter-spacing: -0.5px; }
-.hero p { margin: 0.5rem 0 0; font-size: 1.02rem; color: rgba(255,255,255,0.88) !important; }
-.pill {
-    display: inline-block; margin: 0.9rem 0.4rem 0 0; padding: 0.28rem 0.8rem; border-radius: 999px;
-    background: rgba(255,255,255,0.18); color: #fff !important; font-size: 0.78rem; font-weight: 600;
-    backdrop-filter: blur(6px); border: 1px solid rgba(255,255,255,0.25);
-}
-
-/* section titles */
-.sec-title {
-    display: flex; align-items: center; gap: 0.6rem; margin: 0.4rem 0 0.9rem;
-    font-size: 1.12rem; font-weight: 700; color: #fff;
-}
-.sec-title .num {
-    width: 28px; height: 28px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;
-    background: linear-gradient(135deg, #6366f1, #a855f7); font-size: 0.85rem; color: #fff;
-}
-
-/* form card */
-[data-testid="stForm"] {
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.09);
-    border-radius: 20px; padding: 1.6rem 1.8rem;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.25);
-}
-
-/* inputs */
-.stTextInput input, .stTextArea textarea, .stNumberInput input, .stDateInput input,
-div[data-baseweb="select"] > div {
-    background: rgba(255,255,255,0.06) !important;
-    border: 1px solid rgba(255,255,255,0.12) !important;
-    border-radius: 12px !important; color: #f1f3fa !important;
-}
-.stTextInput input:focus, .stTextArea textarea:focus, .stNumberInput input:focus {
-    border-color: #8b5cf6 !important; box-shadow: 0 0 0 3px rgba(139,92,246,0.25) !important;
-}
-div[data-baseweb="select"] span { color: #f1f3fa !important; }
-
-/* tabs */
-.stTabs [data-baseweb="tab-list"] { gap: 6px; background: rgba(255,255,255,0.04); padding: 6px; border-radius: 14px; }
-.stTabs [data-baseweb="tab"] {
-    border-radius: 10px; padding: 0.5rem 1.1rem; background: transparent; color: #9aa3b8; font-weight: 600;
-}
-.stTabs [aria-selected="true"] { background: linear-gradient(135deg, #6366f1, #8b5cf6) !important; color: #fff !important; }
-.stTabs [data-baseweb="tab-highlight"], .stTabs [data-baseweb="tab-border"] { display: none; }
-
-/* buttons */
-.stButton > button, [data-testid="stFormSubmitButton"] > button {
-    border-radius: 14px; font-weight: 700; padding: 0.7rem 1.2rem; border: 0;
-    background: linear-gradient(135deg, #6366f1, #a855f7, #ec4899); color: #fff;
-    box-shadow: 0 10px 28px rgba(139,92,246,0.4); transition: transform .15s ease, box-shadow .15s ease;
-}
-.stButton > button:hover, [data-testid="stFormSubmitButton"] > button:hover {
-    transform: translateY(-2px); box-shadow: 0 14px 34px rgba(139,92,246,0.55); color: #fff;
-}
-
-/* expander */
-[data-testid="stExpander"] {
-    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.09); border-radius: 14px;
-}
-
-/* metric cards */
-.kpi-wrap { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 0.6rem 0 0.4rem; }
-.kpi {
-    position: relative; overflow: hidden; border-radius: 18px; padding: 1.3rem 1.4rem;
-    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
-}
-.kpi::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: var(--accent); }
-.kpi .lbl { font-size: 0.78rem; letter-spacing: .08em; text-transform: uppercase; color: #9aa3b8; font-weight: 600; }
-.kpi .val { font-size: 1.85rem; font-weight: 800; color: #fff; margin-top: 0.3rem; letter-spacing: -0.5px; }
-.kpi .sub { font-size: 0.82rem; margin-top: 0.2rem; color: #9aa3b8; }
-.kpi.up   { --accent: #22c55e; } .kpi.up .val { color: #4ade80; }
-.kpi.down { --accent: #ef4444; } .kpi.down .val { color: #f87171; }
-.kpi.cur  { --accent: #38bdf8; }
-.kpi.prd  { --accent: #a855f7; }
-@media (max-width: 800px) { .kpi-wrap { grid-template-columns: 1fr; } }
-
-/* chat */
-[data-testid="stChatMessage"] {
-    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 16px; padding: 1rem 1.2rem; margin-bottom: 0.7rem;
-}
-[data-testid="stChatInput"] { border-radius: 16px; }
-[data-testid="stChatInput"] textarea { color: #f1f3fa !important; }
-
-hr { border-color: rgba(255,255,255,0.08) !important; }
-</style>
-""",
-    unsafe_allow_html=True,
-)
 
 
 def section(num, title):
