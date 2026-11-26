@@ -1,6 +1,7 @@
 import json
 import uuid
 from datetime import datetime
+from pathlib import Path
 
 import joblib
 import numpy as np
@@ -15,6 +16,10 @@ from langchain_groq import ChatGroq
 load_dotenv()
 
 st.set_page_config(page_title="Startup Growth Advisor", page_icon="🚀", layout="wide")
+
+# Works on both Windows (local) and Linux (Render), from any working directory
+BASE_DIR = Path(__file__).resolve().parent
+MODEL_PATH = BASE_DIR / "models" / "fourth_new_et_model_n_100_pipe.pkl"
 
 # =====================================================================
 #  API KEY GATE (naya): key daale bina aage nahi badh sakte
@@ -179,13 +184,23 @@ if not st.session_state.groq_api_key:
     st.stop()   # key nahi hai to yahin ruk jao, neeche ka kuch nahi chalega
 
 # =====================================================================
-#  YOUR LOGIC (unchanged)
+#  YOUR LOGIC (unchanged except model loading)
 # =====================================================================
 
 GROQ_API_KEY = st.session_state.groq_api_key
-llm = ChatGroq(model='openai/gpt-oss-120b',api_key=GROQ_API_KEY)
+llm = ChatGroq(model='openai/gpt-oss-120b', api_key=GROQ_API_KEY)
 
-fourth_new_et_model_n_100_pipe = joblib.load(r'models\fourth_new_et_model_n_100_pipe.pkl')
+
+@st.cache_resource
+def load_model():
+    if not MODEL_PATH.exists():
+        st.error(f"Model file not found at: {MODEL_PATH}. "
+                 "Make sure models/fourth_new_et_model_n_100_pipe.pkl is pushed to GitHub.")
+        st.stop()
+    return joblib.load(MODEL_PATH)
+
+
+fourth_new_et_model_n_100_pipe = load_model()   # loaded once, reused on every rerun
 
 
 def feature_engineering(df):
@@ -215,7 +230,7 @@ def feature_engineering(df):
     ], axis=1)
 
     df['age_months'] = ((TODAY - df['founded_date']).dt.days / 30.4).clip(lower=0)
-    df['cofounder_count'] = df['cofounders'].apply(lambda s: len(eval(s)))  # to count the memebrs in cofounders list
+    df['cofounder_count'] = df['cofounders'].apply(lambda s: len(json.loads(s)))  # count members in cofounders list
     df = df.drop(['founded_date', 'cofounders'], axis=1)
 
     # business_model -> 5 groups
@@ -305,7 +320,7 @@ model_cols = [
 # picked the new tunded et model with n_estimators=100 because the test rmse test r2 was better than the previous models..
 def model_prediction(input_df):
 
-    model_df = feature_engineering(input_df)
+    model_df = feature_engineering(input_df.copy())
     model_df = model_df[model_cols]
 
     revenue_now = input_df['annual_revenue'][0]
